@@ -53,4 +53,4 @@ app.get("/", async (req) => {
 
 app.listen({ port: 80 });
 
-daily(async () => await fetch("http://localhost:80"));
+// daily(async () => await fetch("http://localhost:80"));
