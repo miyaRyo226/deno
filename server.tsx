@@ -18,8 +18,12 @@ app.get("/", async (req) => {
   //気象庁APIから佐賀県の情報を取得
   const { targetArea, headlineText, text }: WEATHER_OVERVIEW_TYPE = await fetch(
     WEATHER_OVERVIEW
-  ).then((res) => res.json());
-  const weathers = await fetch(WEATHER).then((res) => res.json());
+  )
+    .then((res) => res.json())
+    .catch((e) => console.log(e));
+  const weathers = await fetch(WEATHER)
+    .then((res) => res.json())
+    .catch((e) => console.log(e));
   //今日の天気
   const todayArea = weathers[0].timeSeries[0].areas[0];
   const forecasts: string[] = todayArea.weathers;
