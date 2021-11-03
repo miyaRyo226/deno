@@ -21,7 +21,7 @@ const App = ({
   headlineText,
   text,
   forecasts,
-}: APPTYPE): JSX.Element => (
+}: APPTYPE): JSX.ElementClass => (
   <html lang="en">
     <head>
       <title>Document</title>
