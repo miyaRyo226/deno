@@ -87,11 +87,17 @@ const handler = async (req: Request): Promise<Response> => {
       console.log(json);
 
       if (json.events.length > 0) {
-        //入力した文字が天気に関係なかったらオウム返しをする
+        //入力した文字が天気に関係なかったらランダムにメッセージを返信する
         const inputMessage: string = json.events[0]?.message?.text;
         if (!inputMessage.includes("天気")) {
+          const randomMessage = [
+            "ふぁあ〜今日も眠たいね😪",
+            "僕わかんない😂",
+            "質問の意味がわからないぞ（இ﹏இ`｡)",
+          ];
+          const messageNo = Math.floor(Math.random() * randomMessage.length);
           await replyMessage(
-            json.events[0]?.message?.text,
+            randomMessage[messageNo],
             json.events[0]?.replyToken,
             CHANNEL_ACCESS_TOKEN
           );
