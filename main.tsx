@@ -87,8 +87,39 @@ const handler = async (req: Request): Promise<Response> => {
       console.log(json);
 
       if (json.events.length > 0) {
+        //入力した文字が天気に関係なかったらオウム返しをする
+        const inputMessage: string = json.events[0]?.message?.text;
+        if (!inputMessage.includes("天気")) {
+          await replyMessage(
+            json.events[0]?.message?.text,
+            json.events[0]?.replyToken,
+            CHANNEL_ACCESS_TOKEN
+          );
+        }
+
+        //気象庁APIから佐賀県の情報を取得
+        const { targetArea, headlineText, text }: WEATHER_OVERVIEW_TYPE =
+          await fetch(WEATHER_OVERVIEW)
+            .then((res) => res.json())
+            .catch((e) => console.log(e));
+        const weathers = await fetch(WEATHER)
+          .then((res) => res.json())
+          .catch((e) => console.log(e));
+        //今日の天気
+        const todayArea = weathers[0].timeSeries[0].areas[0];
+        const forecasts: string[] = todayArea.weathers;
+
+        //天気に関係ある場合は、天気情報を送信する。
+        const replyForecast = [
+          `今日の天気を教えるよ〜〜`,
+          `${targetArea}の情報だよ！`,
+          headlineText,
+          text,
+          ...forecasts,
+        ];
+
         await replyMessage(
-          json.events[0]?.message?.text,
+          replyForecast.join(","),
           json.events[0]?.replyToken,
           CHANNEL_ACCESS_TOKEN
         );
