@@ -119,7 +119,7 @@ const handler = async (req: Request): Promise<Response> => {
         ];
 
         await replyMessage(
-          replyForecast.join(","),
+          replyForecast.join("n"),
           json.events[0]?.replyToken,
           CHANNEL_ACCESS_TOKEN
         );
