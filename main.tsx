@@ -5,7 +5,12 @@
 /// <reference lib="deno.ns" />
 import { h, renderSSR } from "https://deno.land/x/nano_jsx@v0.0.20/mod.ts";
 
-import { WEATHER_OVERVIEW, WEATHER } from "./api.ts";
+import {
+  WEATHER_OVERVIEW,
+  WEATHER,
+  replyMessage,
+  CHANNEL_ACCESS_TOKEN,
+} from "./api.ts";
 import { WEATHER_OVERVIEW_TYPE } from "./type.ts";
 import { listenAndServe } from "https://deno.land/std@0.111.0/http/server.ts";
 
@@ -45,31 +50,53 @@ const App = ({
 );
 
 const handler = async (req: Request): Promise<Response> => {
-  //気象庁APIから佐賀県の情報を取得
-  const { targetArea, headlineText, text }: WEATHER_OVERVIEW_TYPE = await fetch(
-    WEATHER_OVERVIEW
-  )
-    .then((res) => res.json())
-    .catch((e) => console.log(e));
-  const weathers = await fetch(WEATHER)
-    .then((res) => res.json())
-    .catch((e) => console.log(e));
-  //今日の天気
-  const todayArea = weathers[0].timeSeries[0].areas[0];
-  const forecasts: string[] = todayArea.weathers;
-  const html = renderSSR(
-    <App
-      targetArea={targetArea}
-      headlineText={headlineText}
-      text={text}
-      forecasts={forecasts}
-    />
-  );
-  return new Response(html, {
-    headers: {
-      "content-type": "text/html",
-    },
-  });
+  //Getリクエスト
+  if (req.method == "GET") {
+    //気象庁APIから佐賀県の情報を取得
+    const { targetArea, headlineText, text }: WEATHER_OVERVIEW_TYPE =
+      await fetch(WEATHER_OVERVIEW)
+        .then((res) => res.json())
+        .catch((e) => console.log(e));
+    const weathers = await fetch(WEATHER)
+      .then((res) => res.json())
+      .catch((e) => console.log(e));
+    //今日の天気
+    const todayArea = weathers[0].timeSeries[0].areas[0];
+    const forecasts: string[] = todayArea.weathers;
+    const html = renderSSR(
+      <App
+        targetArea={targetArea}
+        headlineText={headlineText}
+        text={text}
+        forecasts={forecasts}
+      />
+    );
+    return new Response(html, {
+      headers: {
+        "content-type": "text/html",
+      },
+    });
+  }
+
+  //Postリクエスト
+  if (req.method == "POST") {
+    //コンテンツタイプ
+    const contentType = req.headers.get("content-type");
+    if (contentType?.includes("application/json")) {
+      const json = await req.json();
+      console.log(json);
+
+      if (json.events.length > 0) {
+        await replyMessage(
+          json.events[0]?.message?.text,
+          json.events[0]?.replyToken,
+          CHANNEL_ACCESS_TOKEN
+        );
+      }
+      return new Response();
+    }
+  }
+  return new Response("送信に失敗しました。");
 };
 
 console.log("Listening on http://localhost:80");
