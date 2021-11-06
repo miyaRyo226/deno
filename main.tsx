@@ -15,8 +15,6 @@ import {
 import { WEATHER_OVERVIEW_TYPE } from "./type.ts";
 import { listenAndServe } from "https://deno.land/std@0.111.0/http/server.ts";
 
-import { cron } from "https://deno.land/x/deno_cron/cron.ts";
-
 //render引数
 type APPTYPE = {
   targetArea: string;
@@ -134,4 +132,3 @@ const handler = async (req: Request): Promise<Response> => {
 };
 
 await listenAndServe(":80", handler);
-// cron()
