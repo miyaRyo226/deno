@@ -115,16 +115,16 @@ const handler = async (req: Request): Promise<Response> => {
 
 await listenAndServe(":80", handler);
 //cron処理を設定
-everyMinute(async () => {
-  //気象庁APIから佐賀県の情報を取得
-  const { targetArea, headlineText, text, forecasts } = await getForeCastInfo();
-  //Lineにプッシュ通知をする
-  const pushForecast = [
-    `今日の天気を教えるよ〜〜`,
-    `${targetArea}の情報だよ！`,
-    headlineText,
-    text,
-    ...forecasts,
-  ];
-  await pushMessage(pushForecast.join("\n"));
-});
+// everyMinute(async () => {
+//   //気象庁APIから佐賀県の情報を取得
+//   const { targetArea, headlineText, text, forecasts } = await getForeCastInfo();
+//   //Lineにプッシュ通知をする
+//   const pushForecast = [
+//     `今日の天気を教えるよ〜〜`,
+//     `${targetArea}の情報だよ！`,
+//     headlineText,
+//     text,
+//     ...forecasts,
+//   ];
+//   await pushMessage(pushForecast.join("\n"));
+// });
