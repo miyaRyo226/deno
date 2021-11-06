@@ -10,9 +10,12 @@ import {
   WEATHER,
   replyMessage,
   CHANNEL_ACCESS_TOKEN,
+  LINE_MESSAGES,
 } from "./api.ts";
 import { WEATHER_OVERVIEW_TYPE } from "./type.ts";
 import { listenAndServe } from "https://deno.land/std@0.111.0/http/server.ts";
+
+import { cron } from "https://deno.land/x/deno_cron/cron.ts";
 
 //render引数
 type APPTYPE = {
@@ -90,14 +93,8 @@ const handler = async (req: Request): Promise<Response> => {
         //入力した文字が天気に関係なかったらランダムにメッセージを返信する
         const inputMessage: string = json.events[0]?.message?.text;
         if (!inputMessage.includes("天気")) {
-          const randomMessage = [
-            "ふぁあ〜今日も眠たいね😪",
-            "僕わかんない😂",
-            "質問の意味がわからないぞ（இ﹏இ`｡)",
-          ];
-          const messageNo = Math.floor(Math.random() * randomMessage.length);
           await replyMessage(
-            randomMessage[messageNo],
+            LINE_MESSAGES[Math.floor(Math.random() * LINE_MESSAGES.length)],
             json.events[0]?.replyToken,
             CHANNEL_ACCESS_TOKEN
           );
@@ -136,5 +133,6 @@ const handler = async (req: Request): Promise<Response> => {
   return new Response("送信に失敗しました。");
 };
 
-console.log("Listening on http://localhost:80");
 await listenAndServe(":80", handler);
+await listenAndServe(":80/test", () => new Response("テスト中....."));
+// cron()
