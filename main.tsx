@@ -4,15 +4,14 @@
 /// <reference lib="dom.asynciterable" />
 /// <reference lib="deno.ns" />
 import { h, renderSSR } from "https://deno.land/x/nano_jsx@v0.0.20/mod.ts";
-
+import { everyMinute } from "https://deno.land/x/deno_cron/cron.ts";
 import {
-  WEATHER_OVERVIEW,
-  WEATHER,
   replyMessage,
+  pushMessage,
   CHANNEL_ACCESS_TOKEN,
   LINE_MESSAGES,
+  getForeCastInfo,
 } from "./api.ts";
-import { WEATHER_OVERVIEW_TYPE } from "./type.ts";
 import { listenAndServe } from "https://deno.land/std@0.111.0/http/server.ts";
 
 //render引数
@@ -51,84 +50,81 @@ const App = ({
 );
 
 const handler = async (req: Request): Promise<Response> => {
-  //Getリクエスト
-  if (req.method == "GET") {
+  try {
     //気象庁APIから佐賀県の情報を取得
-    const { targetArea, headlineText, text }: WEATHER_OVERVIEW_TYPE =
-      await fetch(WEATHER_OVERVIEW)
-        .then((res) => res.json())
-        .catch((e) => console.log(e));
-    const weathers = await fetch(WEATHER)
-      .then((res) => res.json())
-      .catch((e) => console.log(e));
-    //今日の天気
-    const todayArea = weathers[0].timeSeries[0].areas[0];
-    const forecasts: string[] = todayArea.weathers;
-    const html = renderSSR(
-      <App
-        targetArea={targetArea}
-        headlineText={headlineText}
-        text={text}
-        forecasts={forecasts}
-      />
-    );
-    return new Response(html, {
-      headers: {
-        "content-type": "text/html",
-      },
-    });
-  }
+    const { targetArea, headlineText, text, forecasts } =
+      await getForeCastInfo();
+    //Getリクエストの場合はHTMLを返却
+    if (req.method == "GET") {
+      const html = renderSSR(
+        <App
+          targetArea={targetArea}
+          headlineText={headlineText}
+          text={text}
+          forecasts={forecasts}
+        />
+      );
+      return new Response(html, {
+        headers: {
+          "content-type": "text/html",
+        },
+      });
+    }
 
-  //Postリクエスト
-  if (req.method == "POST") {
-    //コンテンツタイプ
-    const contentType = req.headers.get("content-type");
-    if (contentType?.includes("application/json")) {
-      const json = await req.json();
-      console.log(json);
+    //Postリクエスト
+    if (req.method == "POST") {
+      //コンテンツタイプ
+      const contentType = req.headers.get("content-type");
+      if (contentType?.includes("application/json")) {
+        const json = await req.json();
+        console.log(json);
 
-      if (json.events.length > 0) {
-        //入力した文字が天気に関係なかったらランダムにメッセージを返信する
-        const inputMessage: string = json.events[0]?.message?.text;
-        if (!inputMessage.includes("天気")) {
+        if (json.events.length > 0) {
+          //入力した文字が天気に関係なかったらランダムにメッセージを返信する
+          const inputMessage: string = json.events[0]?.message?.text;
+          if (!inputMessage.includes("天気")) {
+            await replyMessage(
+              LINE_MESSAGES[Math.floor(Math.random() * LINE_MESSAGES.length)],
+              json.events[0]?.replyToken
+            );
+          }
+
+          //天気に関係ある場合は、天気情報を送信する。
+          const replyForecast = [
+            `今日の天気を教えるよ〜〜`,
+            `${targetArea}の情報だよ！`,
+            headlineText,
+            text,
+            ...forecasts,
+          ];
+
           await replyMessage(
-            LINE_MESSAGES[Math.floor(Math.random() * LINE_MESSAGES.length)],
-            json.events[0]?.replyToken,
-            CHANNEL_ACCESS_TOKEN
+            replyForecast.join("\n"),
+            json.events[0]?.replyToken
           );
         }
-
-        //気象庁APIから佐賀県の情報を取得
-        const { targetArea, headlineText, text }: WEATHER_OVERVIEW_TYPE =
-          await fetch(WEATHER_OVERVIEW)
-            .then((res) => res.json())
-            .catch((e) => console.log(e));
-        const weathers = await fetch(WEATHER)
-          .then((res) => res.json())
-          .catch((e) => console.log(e));
-        //今日の天気
-        const todayArea = weathers[0].timeSeries[0].areas[0];
-        const forecasts: string[] = todayArea.weathers;
-
-        //天気に関係ある場合は、天気情報を送信する。
-        const replyForecast = [
-          `今日の天気を教えるよ〜〜`,
-          `${targetArea}の情報だよ！`,
-          headlineText,
-          text,
-          ...forecasts,
-        ];
-
-        await replyMessage(
-          replyForecast.join("\n"),
-          json.events[0]?.replyToken,
-          CHANNEL_ACCESS_TOKEN
-        );
+        return new Response();
       }
-      return new Response();
     }
+    return new Response();
+  } catch (error) {
+    console.log(error);
+    return new Response("送信に失敗しました。");
   }
-  return new Response("送信に失敗しました。");
 };
 
 await listenAndServe(":80", handler);
+//cron処理を設定
+everyMinute(async () => {
+  //気象庁APIから佐賀県の情報を取得
+  const { targetArea, headlineText, text, forecasts } = await getForeCastInfo();
+  //Lineにプッシュ通知をする
+  const pushForecast = [
+    `今日の天気を教えるよ〜〜`,
+    `${targetArea}の情報だよ！`,
+    headlineText,
+    text,
+    ...forecasts,
+  ];
+  await pushMessage(pushForecast.join("\n"));
+});
