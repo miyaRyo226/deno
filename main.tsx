@@ -111,3 +111,4 @@ const handler = async (req: Request): Promise<Response> => {
 };
 
 await listenAndServe(":80", handler);
+console.log("TEST!!!!");
