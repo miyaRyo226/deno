@@ -44,3 +44,33 @@ export const replyMessage = async (message: string,
         body: JSON.stringify(body),
     })
 }
+/**
+ * Lineにプッシュメッセージを送信する関数
+ * @param message 返信メッセージ
+ * @param replyToken 返信時に発行されるトークン
+ * @param token チャンネルアクセストークン
+ * @returns Promise<Response>
+ */
+export const pushMessage = async (message: string,
+    replyToken: string,
+    token: string,
+): Promise<Response> => {
+    const body = {
+        replyToken,
+        messages: [
+            {
+                type: "text",
+                text: message,
+            },
+        ],
+    };
+
+    return fetch(LINEAPI, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(body),
+    })
+}

@@ -132,4 +132,3 @@ const handler = async (req: Request): Promise<Response> => {
 };
 
 await listenAndServe(":80", handler);
-await listenAndServe(":80/test", () => new Response("テスト中...."));
