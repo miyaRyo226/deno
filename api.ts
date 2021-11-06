@@ -25,25 +25,29 @@ export const LINE_MESSAGES = ["ふぁあ〜今日も眠たいね😪",
  */
 export const replyMessage = async (message: string,
     replyToken: string,
-): Promise<Response> => {
-    const body = {
-        replyToken,
-        messages: [
-            {
-                type: "text",
-                text: message,
-            },
-        ],
-    };
+): Promise<void> => {
+    try {
+        const body = {
+            replyToken,
+            messages: [
+                {
+                    type: "text",
+                    text: message,
+                },
+            ],
+        };
 
-    return fetch(LINE_REPLY_URL_API, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json charset=UTF-8",
-            Authorization: `Bearer ${CHANNEL_ACCESS_TOKEN}`,
-        },
-        body: JSON.stringify(body),
-    })
+        fetch(LINE_REPLY_URL_API, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${CHANNEL_ACCESS_TOKEN}`,
+            },
+            body: JSON.stringify(body),
+        })
+    } catch (error) {
+        console.log(error);
+    }
 }
 /**
  * Lineにプッシュメッセージを送信する関数
@@ -53,26 +57,32 @@ export const replyMessage = async (message: string,
  * @returns Promise<Response>
  */
 export const pushMessage = async (message: string
-): Promise<Response> => {
-    const body = {
-        //指定したユーザID
-        to: USER_ID,
-        messages: [
-            {
-                type: "text",
-                text: message,
-            },
-        ],
-    };
+): Promise<void> => {
+    try {
 
-    return fetch(LINE_REPLY_URL_API, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json; charset=UTF-8",
-            Authorization: `Bearer ${CHANNEL_ACCESS_TOKEN}`,
-        },
-        body: JSON.stringify(body),
-    })
+        const body = {
+            //指定したユーザID
+            to: USER_ID,
+            messages: [
+                {
+                    type: "text",
+                    text: message,
+                },
+            ],
+        };
+
+        fetch(LINE_REPLY_URL_API, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${CHANNEL_ACCESS_TOKEN}`,
+            },
+            body: JSON.stringify(body),
+        })
+    } catch (error) {
+        console.log(error);
+    }
+
 }
 
 /**
