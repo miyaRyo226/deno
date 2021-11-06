@@ -4,14 +4,7 @@
 /// <reference lib="dom.asynciterable" />
 /// <reference lib="deno.ns" />
 import { h, renderSSR } from "https://deno.land/x/nano_jsx@v0.0.20/mod.ts";
-import { everyMinute } from "https://deno.land/x/deno_cron/cron.ts";
-import {
-  replyMessage,
-  pushMessage,
-  CHANNEL_ACCESS_TOKEN,
-  LINE_MESSAGES,
-  getForeCastInfo,
-} from "./api.ts";
+import { replyMessage, LINE_MESSAGES, getForeCastInfo } from "./api.ts";
 import { listenAndServe } from "https://deno.land/std@0.111.0/http/server.ts";
 
 //render引数
@@ -82,6 +75,8 @@ const handler = async (req: Request): Promise<Response> => {
         if (json.events.length > 0) {
           //入力した文字が天気に関係なかったらランダムにメッセージを返信する
           const inputMessage: string = json.events[0]?.message?.text;
+          console.log(inputMessage);
+          console.log(!inputMessage.includes("天気"));
           if (!inputMessage.includes("天気")) {
             await replyMessage(
               LINE_MESSAGES[Math.floor(Math.random() * LINE_MESSAGES.length)],
@@ -114,17 +109,3 @@ const handler = async (req: Request): Promise<Response> => {
 };
 
 await listenAndServe(":80", handler);
-//cron処理を設定
-// everyMinute(async () => {
-//   //気象庁APIから佐賀県の情報を取得
-//   const { targetArea, headlineText, text, forecasts } = await getForeCastInfo();
-//   //Lineにプッシュ通知をする
-//   const pushForecast = [
-//     `今日の天気を教えるよ〜〜`,
-//     `${targetArea}の情報だよ！`,
-//     headlineText,
-//     text,
-//     ...forecasts,
-//   ];
-//   await pushMessage(pushForecast.join("\n"));
-// });
