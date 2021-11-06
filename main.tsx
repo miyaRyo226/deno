@@ -82,6 +82,7 @@ const handler = async (req: Request): Promise<Response> => {
               LINE_MESSAGES[Math.floor(Math.random() * LINE_MESSAGES.length)],
               json.events[0]?.replyToken
             );
+            return new Response();
           }
 
           //天気に関係ある場合は、天気情報を送信する。
@@ -97,6 +98,7 @@ const handler = async (req: Request): Promise<Response> => {
             replyForecast.join("\n"),
             json.events[0]?.replyToken
           );
+          return new Response();
         }
         return new Response();
       }
