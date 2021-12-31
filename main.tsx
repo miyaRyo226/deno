@@ -4,7 +4,12 @@
 /// <reference lib="dom.asynciterable" />
 /// <reference lib="deno.ns" />
 import { h, renderSSR } from "https://deno.land/x/nano_jsx@v0.0.20/mod.ts";
-import { replyMessage, LINE_MESSAGES, getForeCastInfo } from "./api.ts";
+import {
+  replyMessage,
+  LINE_MESSAGES,
+  getForeCastInfo,
+  nowSeason,
+} from "./api.ts";
 import { listenAndServe } from "https://deno.land/std@0.111.0/http/server.ts";
 
 //render引数
@@ -78,8 +83,10 @@ const handler = async (req: Request): Promise<Response> => {
           console.log(inputMessage);
           console.log(!inputMessage.includes("天気"));
           if (!inputMessage.includes("天気")) {
+            //現在の日付に応じて返す配列の中身を返す。
+            const replyMessages = [...LINE_MESSAGES, ...nowSeason().season];
             await replyMessage(
-              LINE_MESSAGES[Math.floor(Math.random() * LINE_MESSAGES.length)],
+              replyMessages[Math.floor(Math.random() * replyMessages.length)],
               json.events[0]?.replyToken
             );
             return new Response();
@@ -110,5 +117,5 @@ const handler = async (req: Request): Promise<Response> => {
   }
 };
 
-await listenAndServe(":80", handler);
+await listenAndServe(": ", handler);
 console.log("TEST!!!!");
