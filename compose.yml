@@ -1,0 +1,9 @@
+services:
+  deno:
+    build: .
+    volumes:
+      - type: bind
+        source: .
+        target: /app
+    working_dir: /app
+    command: tail -F anything

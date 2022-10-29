@@ -1,0 +1,33 @@
+{
+    "dockerComposeFile": "../compose.yml",
+    "service": "deno",
+	"workspaceFolder": "/app",
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"steoates.autoimport",
+				"formulahendry.auto-rename-tag",
+				"laurencebahiirwa.deno-std-lib-snippets",
+				"justjavac.vscode-deno-extensionpack",
+				"redhat.fabric8-analytics",
+				"janisdd.vscode-edit-csv",
+				"dsznajder.es7-react-js-snippets",
+				"dbaeumer.vscode-eslint",
+				"mhutchie.git-graph",
+				"donjayamanne.githistory",
+				"cschleiden.vscode-github-actions",
+				"me-dutour-mathieu.vscode-github-actions",
+				"GitHub.codespaces",
+				"GitHub.vscode-pull-request-github",
+				"eamodio.gitlens",
+				"oderwat.indent-rainbow",
+				"wix.vscode-import-cost",
+				"MS-CEINTL.vscode-language-pack-ja",
+				"ms-vsliveshare.vsliveshare",
+				"esbenp.prettier-vscode",
+				"ms-azuretools.vscode-docker",
+				"p1c2u.docker-compose"
+			]
+		}
+	}
+  }
